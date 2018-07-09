@@ -52,4 +52,55 @@ class Typo3ContentRepository
             ->fetch();
     }
 
+
+    public function getGridElementsByPage(int $pageUid): array
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('tt_content');
+        return $queryBuilder
+            ->select('*')
+            ->from('tt_content')
+            ->where(
+                $queryBuilder->expr()->eq('pid',
+                    $queryBuilder->createNamedParameter($pageUid, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq('CType',
+                    $queryBuilder->createNamedParameter('tx_gridelements_container', \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq('sys_language_uid',
+                    $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                )
+            )
+            ->orderBy('sorting')
+            ->execute()
+            ->fetchAll();
+    }
+
+    /**
+     * @param int $gridUid
+     * @return array
+     */
+    public function getContainerGridContentElements(int $gridUid): array
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('tt_content');
+        return $queryBuilder
+            ->select('*')
+            ->from('tt_content')
+            ->where(
+                $queryBuilder->expr()->eq('tx_gridelements_container',
+                    $queryBuilder->createNamedParameter($gridUid, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq('CType',
+                    $queryBuilder->createNamedParameter('text', \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq('sys_language_uid',
+                    $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                )
+            )
+            ->orderBy('sorting')
+            ->execute()
+            ->fetchAll();
+    }
+
 }
